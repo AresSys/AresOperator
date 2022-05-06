@@ -1,0 +1,46 @@
+apiVersion: ares.io/v1
+kind: AresJob
+metadata:
+  name: tensorflow-sample
+spec:
+  frameworkType: tensorflow
+  framework:
+    tensorflow:
+      enableDynamicWorker: true
+  runPolicy:
+    schedulingPolicy:
+      minAvailable: 4
+  roleSpecs:
+    master:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - while true; do if [[ -f /etc/code ]]; then exit $(cat /etc/code); fi; echo "detecting"; sleep 1; done
+              image: ${IMAGE}
+              name: tensorflow
+    worker:
+      replicas: 2
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - while true; do if [[ -f /etc/code ]]; then exit $(cat /etc/code); fi; echo "detecting"; sleep 1; done
+              image: ${IMAGE}
+              name: tensorflow
+    evaluator:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - while true; do if [[ -f /etc/code ]]; then exit $(cat /etc/code); fi; echo "detecting"; sleep 1; done
+              image: ${IMAGE}
+              name: tensorflow

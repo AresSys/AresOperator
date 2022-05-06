@@ -1,0 +1,27 @@
+apiVersion: ares.io/v1
+kind: AresJob
+metadata:
+  name: standalone-sample
+spec:
+  frameworkType: standalone
+  roleSpecs:
+    worker:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - while true; do if [[ -f /etc/code ]]; then exit $(cat /etc/code); fi; echo "detecting"; sleep 1; done
+              image: ${IMAGE}
+              name: worker
+              volumeMounts:
+                - name: worker-shm
+                  mountPath: /dev/shm
+          volumes:
+            - name: worker-shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 1Mi
