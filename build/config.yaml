@@ -1,0 +1,35 @@
+cache:
+  observer:
+    enabled: true # if (enabled=false); cacheURI=${.cache.uri}
+    service: ares-observer.ares # if (enabled==true && nodePort<=0); cacheURI=http://${.cache.observer.service}
+    nodePort: 30037 # if (enabled==true && nodePort>0); cacheURI=nodePort://${.cache.observer.nodePort}
+    namespace: ares
+    labels:
+      app: ares
+      module: ares-observer
+operator:
+  restConfig:
+    qps: 30.0
+    burst: 60
+  aresjob:
+    ttlSecondsAfterSucceeded: null
+initializers:
+  common:
+    image: aressys/aresjob-initializer:v1
+    cmd: |
+      ./initializer
+      cache
+      --logtostderr
+      --timeout 0
+      --interval 30s
+      --cacheURI {{.CacheURI}}
+      --roles {{.Roles}}
+      --key {{.Key}}
+      --dial-timeout 1m
+      --read-timeout 1m
+      --max-retries 10
+      --mpi-host-replicas {{.ReplicasPerNode}}
+      --write-mpi-hostfile-to {{.MPIHostFile}}
+      --mpi-implementation {{.MPIImplementation}}
+    envs:
+      TEST: true

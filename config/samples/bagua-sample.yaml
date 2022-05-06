@@ -1,0 +1,39 @@
+apiVersion: ares.io/v1
+kind: AresJob
+metadata:
+  name: bagua-sample-elastic
+spec:
+  frameworkType: bagua
+  framework:
+    bagua:
+      enableElastic: true
+  availablePorts:
+    - 12355
+    - 12356
+    - 12357
+    - 12358
+    - 12359
+    - 12360
+  roleSpecs:
+    worker:
+      replicas: 2
+      template:
+        spec:
+          containers:
+          - name: bagua
+            image: ${IMAGE}
+            command:
+            - "sh"
+            - "-c"
+            - "sleep 1d"
+    etcd:
+      replicas: 1
+      template:
+        spec:
+          containers:
+          - name: bagua
+            image: ${IMAGE}
+            command:
+            - "sh"
+            - "-c"
+            - "sleep 1d"

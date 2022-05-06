@@ -1,0 +1,51 @@
+apiVersion: ares.io/v1
+kind: AresJob
+metadata:
+  name: pytorch-sample
+spec:
+  frameworkType: pytorch
+  runPolicy:
+    schedulingPolicy:
+      minAvailable: 2
+  roleSpecs:
+    master:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - while true; do if [[ -f /etc/code ]]; then exit $(cat /etc/code); fi; echo "detecting"; sleep 1; done
+              image: ${IMAGE}
+              name: pytorch
+              volumeMounts:
+                - name: worker-shm
+                  mountPath: /dev/shm
+              ports:
+              - name: pytorch
+                containerPort: 40000
+          volumes:
+            - name: worker-shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 1Mi
+    worker:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - command:
+                - /bin/bash
+                - -c
+                - while true; do if [[ -f /etc/code ]]; then exit $(cat /etc/code); fi; echo "detecting"; sleep 1; done
+              image: ${IMAGE}
+              name: worker
+              volumeMounts:
+                - name: launcher-shm
+                  mountPath: /dev/shm
+          volumes:
+            - name: launcher-shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 1Mi
