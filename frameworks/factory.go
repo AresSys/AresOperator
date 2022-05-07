@@ -4,7 +4,15 @@ import (
 	"sync"
 
 	aresv1 "ares-operator/api/v1"
+	"ares-operator/frameworks/bagua"
 	"ares-operator/frameworks/common"
+	"ares-operator/frameworks/custom"
+	"ares-operator/frameworks/dask"
+	"ares-operator/frameworks/demo"
+	"ares-operator/frameworks/mpi"
+	"ares-operator/frameworks/pytorch"
+	"ares-operator/frameworks/standalone"
+	"ares-operator/frameworks/tensorflow"
 )
 
 type frameworkFactory struct {
@@ -27,4 +35,12 @@ func RegisterBuilder(name aresv1.FrameworkType, builder common.FrameworkBuilder)
 }
 
 func init() {
+	RegisterBuilder(aresv1.FrameworkBagua, bagua.BaguaBuilder)
+	RegisterBuilder(aresv1.FrameworkCustom, custom.CustomBuilder)
+	RegisterBuilder(aresv1.FrameworkDask, dask.DaskBuilder)
+	RegisterBuilder(aresv1.FrameworkDemo, demo.DemoBuilder)
+	RegisterBuilder(aresv1.FrameworkMPI, mpi.MPIBuilder)
+	RegisterBuilder(aresv1.FrameworkPytorch, pytorch.PytorchBuilder)
+	RegisterBuilder(aresv1.FrameworkStandalone, standalone.StandaloneBuilder)
+	RegisterBuilder(aresv1.FrameworkTensorflow, tensorflow.TensorflowBuilder)
 }
