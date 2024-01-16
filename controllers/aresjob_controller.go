@@ -145,17 +145,16 @@ func (r *AresJobReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	// Use framework to reconcile the job related pod and service
 	if needReconcile {
-		err = framework.ReconcileJobs(job, job.Spec.GetReplicaSpecs(), *job.Status.JobStatus, &job.Spec.RunPolicy)
-	}
-	if err != nil {
-		log.WithError(err).Error("reconcile jobs error")
-		if errors.IsInvalid(err) { // 例如Pod定义非法
-			r.setInvalidDefinition(job, fmt.Sprintf("failed to reconcile: %v", err))
-			return ctrl.Result{}, nil
-		} else if e, ok := reconciler.IsReconcileError(err); ok {
-			return ctrl.Result{RequeueAfter: e.RetryAfter}, e.Err()
+		if err := framework.ReconcileJobs(job, job.Spec.GetReplicaSpecs(), *job.Status.JobStatus, &job.Spec.RunPolicy); err != nil {
+			log.WithError(err).Error("reconcile jobs error")
+			if errors.IsInvalid(err) { // 例如Pod定义非法
+				r.setInvalidDefinition(job, fmt.Sprintf("failed to reconcile: %v", err))
+				return ctrl.Result{}, nil
+			} else if e, ok := reconciler.IsReconcileError(err); ok {
+				return ctrl.Result{RequeueAfter: e.RetryAfter}, e.Err()
+			}
+			return ctrl.Result{Requeue: true}, err
 		}
-		return ctrl.Result{Requeue: true}, err
 	}
 
 	if err := r.Reconciler.SyncFromJob(job); err != nil {
@@ -250,7 +249,7 @@ func (r *AresJobReconciler) setupUnderlyingJobController(mgr ctrl.Manager) {
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	r.Reconciler.JobController = common.JobController{
 		Expectations: expectation.NewControllerExpectations(),
-		//是否使用gangScheduling由我们控制
+		// 是否使用gangScheduling由我们控制
 		Config:           common.JobControllerConfiguration{EnableGangScheduling: false},
 		WorkQueue:        &fake.FakeWorkQueue{},
 		Recorder:         recorder,
